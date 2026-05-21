@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tata Surya — Eksplorasi Antariksa</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --void: #020408;
+    --deep: #060d1a;
+    --panel: rgba(8, 20, 40, 0.85);
+    --border: rgba(80, 160, 255, 0.15);
+    --glow: #4da6ff;
+    --accent: #ff6b35;
+    --gold: #ffd166;
+    --text: #c8deff;
+    --muted: rgba(180, 210, 255, 0.45);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD ── */
+  #stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--d, 3s) infinite alternate ease-in-out;
+  }
+  @keyframes twinkle { from { opacity: 0.1; } to { opacity: 0.9; } }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,180,50,0.18) 0%, rgba(255,100,20,0.06) 40%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 6s infinite ease-in-out;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50%       { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+  }
+
+  .sun-orb {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 36%, #fff5c0, #ffcc00 30%, #ff8800 65%, #cc4400);
+    box-shadow: 0 0 60px 20px rgba(255,160,30,0.5), 0 0 120px 50px rgba(255,100,0,0.25);
+    margin-bottom: 2.5rem;
+    animation: solarPulse 4s infinite ease-in-out;
+    position: relative;
+    z-index: 2;
+  }
+
+  @keyframes solarPulse {
+    0%, 100% { box-shadow: 0 0 60px 20px rgba(255,160,30,0.5), 0 0 120px 50px rgba(255,100,0,0.25); }
+    50%       { box-shadow: 0 0 80px 30px rgba(255,180,50,0.7), 0 0 160px 70px rgba(255,120,0,0.35); }
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.4rem, 7vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff 20%, #ffd166 55%, #ff8c42 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-sub {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    z-index: 2;
+    animation: fadeUpDown 2.5s infinite ease-in-out;
+  }
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+  }
+  @keyframes fadeUpDown {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+    50%       { opacity: 1;   transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(2,4,8,0.92);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.1rem;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.25s, border-color 0.25s;
+  }
+  nav a:hover { color: var(--glow); border-bottom-color: var(--glow); }
+  nav .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── SECTION ── */
+  section.planet-section {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* ── PLANET CARD ── */
+  .planet-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-bottom: 8rem;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .planet-card.visible { opacity: 1; transform: translateY(0); }
+  .planet-card:nth-child(even) .planet-visual { order: 2; }
+  .planet-card:nth-child(even) .planet-info   { order: 1; }
+
+  @media (max-width: 768px) {
+    .planet-card { grid-template-columns: 1fr; gap: 2.5rem; }
+    .planet-card:nth-child(even) .planet-visual { order: 0; }
+    .planet-card:nth-child(even) .planet-info   { order: 0; }
+  }
+
+  /* ── PLANET ORBS ── */
+  .planet-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 320px;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(80,160,255,0.08);
+    pointer-events: none;
+  }
+
+  .orb {
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    cursor: pointer;
+  }
+  .orb:hover { transform: scale(1.08); }
+
+  /* Planet-specific styles */
+  .orb-mercury {
+    width: 80px; height: 80px;
+    background: radial-gradient(circle at 35% 35%, #d4c5b0, #8c7b6b 50%, #5a4a3d);
+    box-shadow: -12px -8px 30px rgba(0,0,0,0.6) inset, 0 0 20px rgba(200,160,120,0.15);
+  }
+  .orb-venus {
+    width: 110px; height: 110px;
+    background: radial-gradient(circle at 35% 30%, #fff3c0, #e8c878 35%, #c9963a 65%, #9b6e1e);
+    box-shadow: -15px -10px 35px rgba(0,0,0,0.5) inset, 0 0 30px rgba(230,180,60,0.2);
+  }
+  .orb-earth {
+    width: 115px; height: 115px;
+    background: radial-gradient(circle at 38% 30%, #d4f0ff, #2a8fd4 30%, #1a5fa8 60%, #0d3d6e);
+    box-shadow: -15px -10px 35px rgba(0,0,0,0.5) inset, 0 0 35px rgba(30,120,220,0.25);
+  }
+  .orb-mars {
+    width: 95px; height: 95px;
+    background: radial-gradient(circle at 35% 30%, #ffb090, #d45020 40%, #a03010 70%, #6b1a08);
+    box-shadow: -14px -9px 32px rgba(0,0,0,0.55) inset, 0 0 25px rgba(210,80,30,0.2);
+  }
+  .orb-jupiter {
+    width: 180px; height: 180px;
+    background: repeating-linear-gradient(
+      175deg,
+      #e8c89a 0px, #d4a870 8px, #c08040 10px,
+      #e0b890 14px, #cc9850 18px, #b87030 20px,
+      #e8c89a 24px
+    );
+    box-shadow: -22px -15px 50px rgba(0,0,0,0.5) inset, 0 0 40px rgba(200,140,60,0.2);
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .orb-saturn {
+    width: 130px; height: 130px;
+    background: radial-gradient(circle at 38% 32%, #f0e0c0, #d4b880 40%, #b89050 70%, #8a6830);
+    box-shadow: -18px -12px 40px rgba(0,0,0,0.5) inset, 0 0 30px rgba(200,170,80,0.18);
+  }
+  .saturn-ring-wrap {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotateX(72deg);
+  }
+  .saturn-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 0px solid transparent;
+  }
+  .saturn-ring-1 { width: 190px; height: 190px; border-width: 8px;  border-color: rgba(210,180,100,0.55); }
+  .saturn-ring-2 { width: 215px; height: 215px; border-width: 5px;  border-color: rgba(180,150,80,0.35); }
+  .saturn-ring-3 { width: 170px; height: 170px; border-width: 4px;  border-color: rgba(230,200,120,0.3); }
+
+  .orb-uranus {
+    width: 125px; height: 125px;
+    background: radial-gradient(circle at 38% 32%, #d0f8f8, #5bc8d8 40%, #2a90a8 70%, #105870);
+    box-shadow: -16px -11px 38px rgba(0,0,0,0.5) inset, 0 0 35px rgba(60,180,210,0.22);
+  }
+  .orb-neptune {
+    width: 120px; height: 120px;
+    background: radial-gradient(circle at 35% 30%, #b0c8ff, #2840d8 35%, #1020a0 65%, #080868);
+    box-shadow: -16px -11px 36px rgba(0,0,0,0.55) inset, 0 0 35px rgba(40,80,220,0.25);
+  }
+
+  /* ── PLANET INFO ── */
+  .planet-info h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+  }
+  .planet-type {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+  .planet-desc {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: rgba(200,220,255,0.75);
+    margin-bottom: 2rem;
+    line-height: 1.75;
+  }
+
+  /* Stats grid */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--border);
+  }
+  .stat {
+    background: var(--panel);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  /* Fun fact badge */
+  .fun-fact {
+    margin-top: 1.5rem;
+    padding: 0.9rem 1.2rem;
+    border-left: 2px solid var(--accent);
+    background: rgba(255,107,53,0.06);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.9rem;
+    color: rgba(255,200,170,0.85);
+    line-height: 1.55;
+  }
+  .fun-fact strong {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    position: relative;
+    z-index: 1;
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 0 2rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ── GLOW LINES ── */
+  .page-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 30% at 50% 0%, rgba(77,166,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 20% at 50% 100%, rgba(77,166,255,0.03) 0%, transparent 60%);
+  }
+
+  /* planet name colors */
+  .c-mercury { color: #c8b090; }
+  .c-venus   { color: #e8c870; }
+  .c-earth   { color: #4da6ff; }
+  .c-mars    { color: #ff6b35; }
+  .c-jupiter { color: #d4a060; }
+  .c-saturn  { color: #d4b870; }
+  .c-uranus  { color: #5bc8d8; }
+  .c-neptune { color: #4060e8; }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<div class="page-glow"></div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="sun-orb"></div>
+  <h1 class="hero-title">TATA SURYA</h1>
+  <p class="hero-sub">Jelajahi Delapan Planet Penghuni Galaksi Bima Sakti</p>
+  <div class="scroll-hint">Gulir ke bawah</div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <a href="#merkurius"><span class="dot" style="background:#c8b090"></span>Merkurius</a>
+  <a href="#venus"><span class="dot" style="background:#e8c870"></span>Venus</a>
+  <a href="#bumi"><span class="dot" style="background:#4da6ff"></span>Bumi</a>
+  <a href="#mars"><span class="dot" style="background:#ff6b35"></span>Mars</a>
+  <a href="#jupiter"><span class="dot" style="background:#d4a060"></span>Jupiter</a>
+  <a href="#saturnus"><span class="dot" style="background:#d4b870"></span>Saturnus</a>
+  <a href="#uranus"><span class="dot" style="background:#5bc8d8"></span>Uranus</a>
+  <a href="#neptunus"><span class="dot" style="background:#4060e8"></span>Neptunus</a>
+</nav>
+
+<!-- PLANETS -->
+<main>
+
+  <!-- MERKURIUS -->
+  <section id="merkurius" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:260px;height:260px;"></div>
+        <div class="orbit-ring" style="width:200px;height:200px;"></div>
+        <div class="orb orb-mercury"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-1</span>
+        <h2 class="c-mercury">Merkurius</h2>
+        <p class="planet-type">Planet Terestrial · Terkecil</p>
+        <p class="planet-desc">Merkurius adalah planet terkecil di tata surya dan yang paling dekat dengan Matahari. Permukaannya dipenuhi kawah akibat tabrakan meteorit selama miliaran tahun, mirip dengan permukaan Bulan.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-mercury">4.879 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-mercury">57,9 juta km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-mercury">88 hari</span></div>
+          <div class="stat"><span class="stat-label">Suhu Permukaan</span><span class="stat-value c-mercury">−180 ~ 430°C</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Meski paling dekat dengan Matahari, Merkurius bukan planet terpanas — Venus jauh lebih panas karena efek rumah kacanya yang ekstrem.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- VENUS -->
+  <section id="venus" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:280px;height:280px;"></div>
+        <div class="orbit-ring" style="width:210px;height:210px;"></div>
+        <div class="orb orb-venus"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-2</span>
+        <h2 class="c-venus">Venus</h2>
+        <p class="planet-type">Planet Terestrial · Terpanas</p>
+        <p class="planet-desc">Venus sering disebut "saudara kembar" Bumi karena ukurannya yang hampir sama. Namun atmosfernya yang tebal penuh CO₂ menciptakan efek rumah kaca yang membuat suhu permukaannya mencapai 465°C — cukup panas untuk melelehkan timbal.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-venus">12.104 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-venus">108,2 juta km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-venus">225 hari</span></div>
+          <div class="stat"><span class="stat-label">Suhu Permukaan</span><span class="stat-value c-venus">~465°C</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Venus berputar searah jarum jam (retrograde), kebalikan dari kebanyakan planet. Satu hari di Venus lebih lama dari satu tahunnya!</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- BUMI -->
+  <section id="bumi" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:290px;height:290px;"></div>
+        <div class="orbit-ring" style="width:215px;height:215px;"></div>
+        <div class="orb orb-earth"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-3</span>
+        <h2 class="c-earth">Bumi</h2>
+        <p class="planet-type">Planet Terestrial · Satu-satunya yang Berpenghuni</p>
+        <p class="planet-desc">Bumi adalah satu-satunya planet yang diketahui memiliki kehidupan. Keberadaan air cair, atmosfer yang kaya oksigen, dan jarak yang tepat dari Matahari menjadikan Bumi tempat yang sempurna bagi jutaan spesies makhluk hidup.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-earth">12.756 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-earth">149,6 juta km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-earth">365,25 hari</span></div>
+          <div class="stat"><span class="stat-label">Jumlah Bulan</span><span class="stat-value c-earth">1 (Bulan)</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>71% permukaan Bumi ditutupi oleh air. Bumi adalah planet berbatu terbesar dan terpadat di tata surya, dengan inti besi-nikel yang menciptakan medan magnet pelindung.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- MARS -->
+  <section id="mars" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:275px;height:275px;"></div>
+        <div class="orbit-ring" style="width:205px;height:205px;"></div>
+        <div class="orb orb-mars"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-4</span>
+        <h2 class="c-mars">Mars</h2>
+        <p class="planet-type">Planet Terestrial · Planet Merah</p>
+        <p class="planet-desc">Mars dijuluki "Planet Merah" karena permukaannya yang kaya oksida besi (karat). Mars memiliki gunung berapi terbesar di tata surya, Olympus Mons, yang tingginya tiga kali lipat Gunung Everest.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-mars">6.779 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-mars">227,9 juta km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-mars">687 hari</span></div>
+          <div class="stat"><span class="stat-label">Jumlah Bulan</span><span class="stat-value c-mars">2 (Phobos & Deimos)</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Mars memiliki badai debu terbesar di tata surya yang dapat mencakup seluruh permukaan planet selama berbulan-bulan. Para ilmuwan percaya Mars dahulu memiliki air cair.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- JUPITER -->
+  <section id="jupiter" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:310px;height:310px;"></div>
+        <div class="orbit-ring" style="width:240px;height:240px;"></div>
+        <div class="orb orb-jupiter"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-5</span>
+        <h2 class="c-jupiter">Jupiter</h2>
+        <p class="planet-type">Planet Gas Raksasa · Terbesar</p>
+        <p class="planet-desc">Jupiter adalah planet terbesar di tata surya, dengan massa lebih dari dua kali gabungan semua planet lainnya. Bintik Merah Besar yang terkenal adalah badai raksasa yang telah berlangsung setidaknya 350 tahun.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-jupiter">139.820 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-jupiter">778,5 juta km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-jupiter">11,9 tahun</span></div>
+          <div class="stat"><span class="stat-label">Jumlah Bulan</span><span class="stat-value c-jupiter">95 bulan</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Jupiter berputar sangat cepat — satu hari hanya 10 jam. Rotasi cepat ini menyebabkan planet menggembung di ekuator dan memipih di kutubnya.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SATURNUS -->
+  <section id="saturnus" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:310px;height:310px;"></div>
+        <div class="saturn-ring-wrap">
+          <div class="saturn-ring saturn-ring-3"></div>
+          <div class="saturn-ring saturn-ring-1"></div>
+          <div class="saturn-ring saturn-ring-2"></div>
+        </div>
+        <div class="orb orb-saturn"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-6</span>
+        <h2 class="c-saturn">Saturnus</h2>
+        <p class="planet-type">Planet Gas Raksasa · Bercincin Indah</p>
+        <p class="planet-desc">Saturnus terkenal dengan sistem cincinnya yang spektakuler, terbuat dari miliaran partikel es dan batuan berukuran dari butir pasir hingga sebesar rumah. Meski tampak masif, Saturnus adalah satu-satunya planet yang densitasnya lebih ringan dari air.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-saturn">116.460 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-saturn">1,43 miliar km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-saturn">29,5 tahun</span></div>
+          <div class="stat"><span class="stat-label">Jumlah Bulan</span><span class="stat-value c-saturn">146 bulan</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Cincin Saturnus membentang hingga 282.000 km dari permukaan planet, namun hanya setebal 20–1.000 meter. Titan, bulan terbesarnya, memiliki atmosfer lebih tebal dari Bumi.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- URANUS -->
+  <section id="uranus" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:295px;height:295px;"></div>
+        <div class="orbit-ring" style="width:220px;height:220px;"></div>
+        <div class="orb orb-uranus"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-7</span>
+        <h2 class="c-uranus">Uranus</h2>
+        <p class="planet-type">Planet Es Raksasa · Planet Miring</p>
+        <p class="planet-desc">Uranus memiliki keunikan ekstrem: sumbu rotasinya miring hampir 98° sehingga planet ini berputar miring ke samping seperti bola menggelinding. Hal ini menyebabkan musim yang sangat panjang — masing-masing kutub mengalami 42 tahun siang dan 42 tahun malam.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-uranus">50.724 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-uranus">2,87 miliar km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-uranus">84 tahun</span></div>
+          <div class="stat"><span class="stat-label">Suhu Atmosfer</span><span class="stat-value c-uranus">−224°C</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Uranus memancarkan sangat sedikit panas dari dalam dibanding planet raksasa lainnya. Warna biru-hijau khasnya berasal dari metana di atmosfer yang menyerap cahaya merah.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- NEPTUNUS -->
+  <section id="neptunus" class="planet-section">
+    <div class="planet-card">
+      <div class="planet-visual">
+        <div class="orbit-ring" style="width:290px;height:290px;"></div>
+        <div class="orbit-ring" style="width:218px;height:218px;"></div>
+        <div class="orb orb-neptune"></div>
+      </div>
+      <div class="planet-info">
+        <span class="section-label">Planet ke-8</span>
+        <h2 class="c-neptune">Neptunus</h2>
+        <p class="planet-type">Planet Es Raksasa · Terjauh · Terdingin</p>
+        <p class="planet-desc">Neptunus adalah planet terjauh di tata surya dan memiliki angin tercepat — mencapai 2.100 km/jam. Meski tidak bisa dilihat dengan mata telanjang, Neptunus ditemukan bukan melalui pengamatan, melainkan melalui prediksi matematis pada tahun 1846.</p>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Diameter</span><span class="stat-value c-neptune">49.244 km</span></div>
+          <div class="stat"><span class="stat-label">Jarak ke Matahari</span><span class="stat-value c-neptune">4,50 miliar km</span></div>
+          <div class="stat"><span class="stat-label">Periode Orbit</span><span class="stat-value c-neptune">165 tahun</span></div>
+          <div class="stat"><span class="stat-label">Jumlah Bulan</span><span class="stat-value c-neptune">16 bulan</span></div>
+        </div>
+        <div class="fun-fact"><strong>Fakta Menarik</strong>Cahaya Matahari membutuhkan sekitar 4 jam untuk mencapai Neptunus. Triton, bulan terbesarnya, adalah satu-satunya bulan besar di tata surya yang bergerak berlawanan arah rotasi planetnya.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Tata Surya — 8 Planet, 1 Bintang, Tak Terbatas Kemungkinan</p>
+  <p style="margin-top:0.5rem;font-size:0.65rem;opacity:0.5">Data berdasarkan NASA Planetary Fact Sheet</p>
+</footer>
+
+<script>
+  // Generate starfield
+  const container = document.getElementById('stars');
+  const count = 220;
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.2 + 0.4;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%;
+      left:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*5).toFixed(2)}s;
+      opacity:${Math.random()*0.6+0.1};
+    `;
+    container.appendChild(s);
+  }
+
+  // Scroll-reveal for planet cards
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.planet-card').forEach(card => observer.observe(card));
+</script>
+</body>
+</html>
